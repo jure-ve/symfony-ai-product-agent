@@ -1,0 +1,15 @@
+ai:
+    platform:
+        generic:
+            groq:
+                base_url: 'https://api.groq.com/openai'
+                api_key: '%env(GROQ_API_KEY)%'
+                model_catalog: 'ai.platform.model_catalog.generic.fallback'
+                supports_completions: true
+                supports_embeddings: true
+                completions_path: '/v1/chat/completions'
+                embeddings_path: '/v1/embeddings'
+    agent:
+        default:
+            platform: 'ai.platform.generic.groq'
+            model: 'llama-3.3-70b-versatile'
