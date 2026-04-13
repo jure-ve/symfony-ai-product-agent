@@ -6,8 +6,8 @@ use App\Repository\ProductRepository;
 use Symfony\AI\Agent\Toolbox\Attribute\AsTool;
 
 #[AsTool(
-    name: 'product_price',
-    description: 'Returns the current price of a product given its SKU',
+    name: 'price',
+    description: 'Returns the exact price of a single product using its SKU identifier.',
 )]
 final class ProductPriceTool
 {
@@ -16,21 +16,21 @@ final class ProductPriceTool
     ) {}
 
     /**
-     * @param string $sku The product SKU identifier
+     * @param string $id The product SKU (e.g. "SKU-100")
      */
-    public function __invoke(string $sku): string
+    public function __invoke(string $id): string
     {
-        $product = $this->productRepository->findBySku($sku);
+        $product = $this->productRepository->findBySku($id);
 
         if ($product === null) {
-            return sprintf('No product found with SKU "%s".', $sku);
+            return sprintf('No encontré el producto con SKU "%s".', $id);
         }
 
         return sprintf(
-            'The product "%s" (SKU: %s) costs %.2f EUR.',
+            'El producto "%s" (SKU: %s) cuesta %.2f EUR.',
             $product->getName(),
-            $sku,
-            $product->getPrice(),
+            $id,
+            $product->getPrice()
         );
     }
 }

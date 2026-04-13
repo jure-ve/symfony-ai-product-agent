@@ -13,3 +13,8 @@ ai:
         default:
             platform: 'ai.platform.generic.groq'
             model: 'llama-3.3-70b-versatile'
+            tools:
+                services:
+                    - { service: 'App\AI\Tool\ProductSearchTool' }
+                    - { service: 'App\AI\Tool\ProductPriceTool' }
+                    - { service: 'App\AI\Tool\ProductCategoryTool' }
