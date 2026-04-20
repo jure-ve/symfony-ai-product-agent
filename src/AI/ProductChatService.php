@@ -13,7 +13,7 @@ final readonly class ProductChatService
         private \Symfony\Component\HttpFoundation\RequestStack $requestStack,
     ) {}
 
-    public function ask(string $userQuestion): string
+    public function streamAsk(string $userQuestion, \Closure $onChunk): void
     {
         $session = $this->requestStack->getSession();
         
@@ -25,16 +25,35 @@ final readonly class ProductChatService
 
         $messages = $this->buildMessageBag($history);
 
-        $result = $this->defaultAgent->call($messages);
-        $answer = (string) $result->getContent();
+        // Start stream
+        $result = $this->defaultAgent->call($messages, ['stream' => true]);
+        $stream = $result->getContent();
+        $fullAnswer = '';
 
-        // Guard: if the answer contains a raw tool call leak, reject it (catches generic function= or name{ JSON leaks)
-        if (preg_match('/^[a-z_]+\{/i', trim($answer)) || preg_match('/function=/', trim($answer)) || empty(trim($answer))) {
-            $answer = 'Lo siento, no pude obtener la información correctamente. ¿Puedes reformular tu pregunta?';
+        foreach ($stream as $delta) {
+            if ($delta instanceof \Symfony\AI\Platform\Result\Stream\Delta\TextDelta) {
+                $content = $delta->getText();
+                if ($content !== '') {
+                    $fullAnswer .= $content;
+                    $onChunk($content);
+                }
+            }
+        }
+
+        // Guard: if the answer contains a raw tool call leak, reject it
+        $isHallucination = preg_match('/^[a-z_]+\{/i', trim($fullAnswer)) || preg_match('/function=/', trim($fullAnswer));
+        
+        if ($isHallucination) {
+            // In streaming we already sent the bad text, but we avoid polluting history
+            $fullAnswer = 'Lo siento, no pude obtener la información correctamente.';
+        } elseif (empty(trim($fullAnswer))) {
+            // If the model returned absolutely nothing, we can stream the fallback now!
+            $fullAnswer = 'Lo siento, hubo un problema procesando tu solicitud.';
+            $onChunk($fullAnswer);
         }
 
         // Append assistant response to history
-        $history[] = ['role' => 'assistant', 'content' => $answer];
+        $history[] = ['role' => 'assistant', 'content' => $fullAnswer];
         
         // Keep only last 10 messages (context window limit)
         if (count($history) > 10) {
@@ -42,8 +61,6 @@ final readonly class ProductChatService
         }
         
         $session->set('chat_history', $history);
-
-        return $answer;
     }
 
     private function buildMessageBag(array $history): MessageBag

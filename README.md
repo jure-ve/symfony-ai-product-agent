@@ -2,7 +2,23 @@
 
 Código fuente del artículo **"Construyendo un Agente de IA con Symfony"**.
 
-Un agente conversacional para una tienda en línea ficticia, construido con Symfony 8, el componente Symfony AI y el modelo Llama 3.3 a través de la API de Groq. El frontend es una página simple con Vanilla JS que consume el backend mediante la Fetch API.
+Un agente conversacional para una tienda en línea ficticia, construido con Symfony 8, el componente Symfony AI y el modelo Llama 3.3 a través de la API de Groq. 
+
+**Características principales:**
+- **Streaming en tiempo real:** Implementado con Server-Sent Events (SSE) para una respuesta instantánea.
+- **Tools dinámicas:** Búsqueda, precios y categorías integradas con el agente.
+- **Historial persistente:** Gestión de contexto mediante sesiones de Symfony.
+- **Frontend nativo:** Interfaz construida con Vanilla JS y CSS moderno, sin frameworks pesados.
+
+---
+
+## Documentación Detallada
+
+Puedes encontrar guías paso a paso de la implementación en los siguientes artículos:
+
+1.  **[Symfony AI en la práctica: agentes, tools y modelos gratuitos desde PHP](https://juredev.com/blog/2026/04/symfony-ai-agentes-tools-php/)**
+2.  **[Symfony AI en la práctica (II): chat conversacional con historial, múltiples tools y Vanilla JS](https://juredev.com/blog/2026/04/symfony-ai-practica-chat-con-historial-tools-y-vanilla-js/)
+3.  **[Symfony AI en la práctica (III): Streaming real con SSE y gestión de Tools anidadas](https://juredev.com/blog/2026/04/symfony-ai-practica-iii-streaming-con-sse-gestion-de-tools-anidadas/)**
 
 ---
 
