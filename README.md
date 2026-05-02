@@ -10,6 +10,8 @@ Un agente conversacional para una tienda en línea ficticia, construido con Symf
 - **Historial persistente:** Gestión de contexto mediante sesiones de Symfony.
 - **Frontend nativo:** Interfaz construida con Vanilla JS y CSS moderno, sin frameworks pesados.
 
+> **Nota:** Actualizado a [Symfony AI v0.8.1](https://github.com/symfony/ai/releases/tag/v0.8.1). La migración desde v0.7 no requirió cambios de código, solo el bump de versiones en `composer.json`.
+
 ---
 
 ## Documentación Detallada
@@ -24,7 +26,7 @@ Puedes encontrar guías paso a paso de la implementación en los siguientes art�
 
 ## Requisitos
 
-- PHP 8.3+
+- PHP 8.4+
 - Composer
 - Una clave API gratuita de [Groq](https://console.groq.com/)
 
@@ -85,29 +87,22 @@ config/packages/ai.yaml             # Configuración del agente y las herramient
 ## Diagrama de Arquitectura
 
 ```mermaid
-flowchart LR
-    subgraph Frontend["Frontend (Vanilla JS)"]
-        A[Usuario] --> B["POST /api/chat"]
+flowchart TD
+    A[Usuario] -->|POST /api/chat| B[ProductChatController]
+    B --> C[ProductChatService]
+    C -->|historial en sesión| C
+    C --> D[AgentInterface]
+    D <-->|chat/completions| E["Groq API (Qwen 3 32B)"]
+    D -->|tool calls| Tools
+
+    subgraph Tools [Herramientas]
+        T1[search]
+        T2[price]
+        T3[categories]
     end
 
-    subgraph Backend["Backend (Symfony 8)"]
-        C[ProductChatController] --> D[ProductChatService]
-        D -->|"Historial de sesión"| D
-        D --> E[AgentInterface]
-    end
-
-    subgraph Tools["Herramientas"]
-        F[ProductSearchTool]
-        G[ProductPriceTool]
-        H[ProductCategoryTool]
-        I[ProductRepository]
-        F & G & H --> I
-    end
-
-    B --> C
-    E -->|tool call| F & G & H
-    E <-->|chat/completions| Groq["Groq API / Llama 3.3"]
-    E -->|respuesta| C --> A
+    Tools --> R[ProductRepository]
+    D -->|respuesta SSE| B --> A
 ```
 
 ---
