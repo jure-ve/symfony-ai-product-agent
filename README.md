@@ -2,7 +2,7 @@
 
 Código fuente del artículo **"Construyendo un Agente de IA con Symfony"**.
 
-Un agente conversacional para una tienda en línea ficticia, construido con Symfony 8, el componente Symfony AI y el modelo Llama 3.3 a través de la API de Groq. 
+Un agente conversacional para una tienda en línea ficticia, construido con Symfony 8, el componente Symfony AI y el modelo Qwen 3 32B a través de la API de Groq. 
 
 **Características principales:**
 - **Streaming en tiempo real:** Implementado con Server-Sent Events (SSE) para una respuesta instantánea.
@@ -10,7 +10,7 @@ Un agente conversacional para una tienda en línea ficticia, construido con Symf
 - **Historial persistente:** Gestión de contexto mediante sesiones de Symfony.
 - **Frontend nativo:** Interfaz construida con Vanilla JS y CSS moderno, sin frameworks pesados.
 
-> **Nota:** Actualizado a [Symfony AI v0.8.1](https://github.com/symfony/ai/releases/tag/v0.8.1). La migración desde v0.7 no requirió cambios de código, solo el bump de versiones en `composer.json`.
+> **Nota:** Actualizado a [Symfony AI v0.9.0](https://github.com/symfony/ai/releases/tag/v0.9.0). La migración desde v0.8 no requirió cambios de código, solo el bump de versiones en `composer.json`.
 
 ---
 
@@ -58,7 +58,7 @@ src/
 ├── AI/
 │   ├── ProductChatService.php      # Gestiona el historial de sesión y construye el MessageBag
 │   └── Tool/
-│       ├── ProductSearchTool.php   # Herramienta: busca productos por nombre (paginado)
+│       ├── ProductSearchTool.php   # Herramienta: busca productos por categoría (paginado)
 │       ├── ProductPriceTool.php    # Herramienta: devuelve el precio de un SKU concreto
 │       └── ProductCategoryTool.php # Herramienta: devuelve las categorías disponibles
 ├── Controller/
@@ -78,7 +78,7 @@ config/packages/ai.yaml             # Configuración del agente y las herramient
 
 | Nombre | Parámetros | Descripción |
 |---|---|---|
-| `search` | `query` (string), `page` (string, por defecto "1") | Busca productos por nombre o categoría. Devuelve 3 resultados por página. |
+| `search` | `category` (string), `page` (string, por defecto "1") | Busca productos por categoría (slug). Devuelve 3 resultados por página. |
 | `price` | `id` (string) | Devuelve el precio de un producto a partir de su SKU. |
 | `categories` | - | Devuelve la lista de categorías disponibles en la tienda. |
 
