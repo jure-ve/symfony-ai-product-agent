@@ -12,7 +12,7 @@ ai:
     agent:
         default:
             platform: 'ai.platform.generic.groq'
-            model: 'qwen/qwen3-32b'
+            model: 'openai/gpt-oss-120b'
             tools:
                 services:
                     - { service: 'App\AI\Tool\ProductSearchTool' }

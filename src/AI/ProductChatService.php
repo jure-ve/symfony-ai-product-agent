@@ -25,8 +25,8 @@ final readonly class ProductChatService
 
         $messages = $this->buildMessageBag($history);
 
-        // Start stream
-        $result = $this->defaultAgent->call($messages, ['stream' => true]);
+        // Start stream — clone to prevent v0.10+ in-place mutation of our MessageBag
+        $result = $this->defaultAgent->call(clone $messages, ['stream' => true]);
         $stream = $result->getContent();
         $fullAnswer = '';
 
@@ -75,7 +75,8 @@ final readonly class ProductChatService
                 "RULES:\n" .
                 "1. Map user synonyms to exact slugs (e.g., 'laptops'->'portatil', 'relojes'->'reloj' or 'celulares'->'telefono').\n" .
                 "2. NO HALLUCINATION: DO NOT invoke unlisted tools (like order/checkout). Never invent products or SKUs.\n" .
-                "3. NO SALES: You cannot process orders or take payments; decline gracefully."
+                "3. NO SALES: You cannot process orders or take payments; decline gracefully.\n" .
+                "4. STAY ON TOPIC: Only answer questions about the store, its products and categories. For unrelated questions, politely redirect the user to the store's offerings."
             )
         ];
 

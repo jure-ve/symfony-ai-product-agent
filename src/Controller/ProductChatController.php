@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\AI\ProductChatService;
+use Symfony\AI\Platform\Exception\ExceedContextSizeException;
+use Symfony\AI\Platform\Exception\ModelNotFoundException;
+use Symfony\AI\Platform\Exception\ServerException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,7 +30,7 @@ class ProductChatController extends AbstractController
             return $this->json(['error' => 'Question is required'], 400);
         }
 
-        $response = new StreamedResponse(function () use ($chatService, $question) {
+        $response = new StreamedResponse(function () use ($chatService, $question, $request) {
             try {
                 $chatService->streamAsk($question, function (string $token) {
                     echo "data: " . json_encode(['text' => $token], JSON_THROW_ON_ERROR) . "\n\n";
@@ -36,6 +38,22 @@ class ProductChatController extends AbstractController
                     flush();
                 });
                 echo "data: [DONE]\n\n";
+                ob_flush();
+                flush();
+            } catch (ExceedContextSizeException $e) {
+                error_log("AI CONTEXT ERROR: " . $e->getMessage());
+                $request->getSession()->remove('chat_history');
+                echo "data: " . json_encode(['error' => 'El historial es muy largo. Se ha limpiado la conversación, intenta de nuevo.']) . "\n\n";
+                ob_flush();
+                flush();
+            } catch (ModelNotFoundException $e) {
+                error_log("AI MODEL ERROR: " . $e->getMessage());
+                echo "data: " . json_encode(['error' => 'El modelo de IA no está disponible en este momento.']) . "\n\n";
+                ob_flush();
+                flush();
+            } catch (ServerException $e) {
+                error_log("AI SERVER ERROR: " . $e->getMessage());
+                echo "data: " . json_encode(['error' => 'El servicio de IA está temporalmente saturado. Intenta en unos segundos.']) . "\n\n";
                 ob_flush();
                 flush();
             } catch (\Throwable $e) {

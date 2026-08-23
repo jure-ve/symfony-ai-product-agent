@@ -2,7 +2,7 @@
 
 Código fuente del artículo **"Construyendo un Agente de IA con Symfony"**.
 
-Un agente conversacional para una tienda en línea ficticia, construido con Symfony 8, el componente Symfony AI y el modelo Qwen 3 32B a través de la API de Groq. 
+Un agente conversacional para una tienda en línea ficticia, construido con Symfony 8, el componente Symfony AI y el modelo GPT OSS 120B (`openai/gpt-oss-120b`) a través de la API de Groq. 
 
 **Características principales:**
 - **Streaming en tiempo real:** Implementado con Server-Sent Events (SSE) para una respuesta instantánea.
@@ -10,7 +10,7 @@ Un agente conversacional para una tienda en línea ficticia, construido con Symf
 - **Historial persistente:** Gestión de contexto mediante sesiones de Symfony.
 - **Frontend nativo:** Interfaz construida con Vanilla JS y CSS moderno, sin frameworks pesados.
 
-> **Nota:** Actualizado a [Symfony AI v0.9.0](https://github.com/symfony/ai/releases/tag/v0.9.0). La migración desde v0.8 no requirió cambios de código, solo el bump de versiones en `composer.json`.
+> **Nota:** Actualizado a [Symfony AI v0.12.0](https://github.com/symfony/ai/releases/tag/v0.12.0). La migración desde v0.9 incorporó manejo granular de errores con excepciones específicas (`ExceedContextSizeException`, `ModelNotFoundException`, `ServerException`) y protección contra la mutación in-place del `MessageBag` introducida en v0.10. Las tools y la configuración del agente no requirieron cambios.
 
 ---
 
@@ -21,6 +21,7 @@ Puedes encontrar guías paso a paso de la implementación en los siguientes art�
 1.  **[Symfony AI en la práctica: agentes, tools y modelos gratuitos desde PHP](https://juredev.com/blog/2026/04/symfony-ai-agentes-tools-php/)**
 2.  **[Symfony AI en la práctica (II): chat conversacional con historial, múltiples tools y Vanilla JS](https://juredev.com/blog/2026/04/symfony-ai-practica-chat-con-historial-tools-y-vanilla-js/)**
 3.  **[Symfony AI en la práctica (III): Streaming real con SSE y gestión de Tools anidadas](https://juredev.com/blog/2026/04/symfony-ai-practica-iii-streaming-con-sse-gestion-de-tools-anidadas/)**
+- **[Actualización técnica: Migración a Symfony AI v0.12, resiliencia y selección de modelos](https://juredev.com/blog/2026/08/symfony-ai-en-la-practica-migracion-a-v0-12/)**
 
 ---
 
@@ -92,7 +93,7 @@ flowchart TD
     B --> C[ProductChatService]
     C -->|historial en sesión| C
     C --> D[AgentInterface]
-    D <-->|chat/completions| E["Groq API (Qwen 3 32B)"]
+    D <-->|chat/completions| E["Groq API (GPT OSS 120B)"]
     D -->|tool calls| Tools
 
     subgraph Tools [Herramientas]
