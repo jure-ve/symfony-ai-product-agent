@@ -25,23 +25,23 @@ final readonly class ProductChatService
 
         $messages = $this->buildMessageBag($history);
 
-        // Start stream — clone to prevent v0.10+ in-place mutation of our MessageBag
-        $result = $this->defaultAgent->call(clone $messages, ['stream' => true]);
-        $stream = $result->getContent();
+        // Start stream — clone to prevent in-place mutation of our MessageBag
+        $execution = $this->defaultAgent->call(clone $messages, ['stream' => true]);
         $fullAnswer = '';
 
-        foreach ($stream as $delta) {
-            if ($delta instanceof \Symfony\AI\Platform\Result\Stream\Delta\TextDelta) {
-                $content = $delta->getText();
-                if ($content !== '') {
-                    $fullAnswer .= $content;
-                    $onChunk($content);
-                }
+        // In Symfony AI v0.14, Execution provides typed asTextStream() generator
+        foreach ($execution->asTextStream() as $delta) {
+            $content = $delta->getText();
+            if ($content !== '') {
+                $fullAnswer .= $content;
+                $onChunk($content);
             }
         }
 
         // Guard: if the answer contains a raw tool call leak, reject it
-        $isHallucination = preg_match('/^[a-z_]+\{/i', trim($fullAnswer)) || preg_match('/function=/', trim($fullAnswer));
+        $isHallucination = preg_match('/^[a-z_]+\{/i', trim($fullAnswer)) 
+            || preg_match('/function=/', trim($fullAnswer)) 
+            || preg_match('/^\{\s*"(?:tool|name)":/i', trim($fullAnswer));
         
         if ($isHallucination) {
             // In streaming we already sent the bad text, but we avoid polluting history
