@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\AI\ProductChatService;
 use Symfony\AI\Platform\Exception\ExceedContextSizeException;
+use Symfony\AI\Platform\Exception\MaxOutputTokensException;
 use Symfony\AI\Platform\Exception\ModelNotFoundException;
+use Symfony\AI\Platform\Exception\RateLimitExceededException;
 use Symfony\AI\Platform\Exception\ServerException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,6 +56,20 @@ class ProductChatController extends AbstractController
             } catch (ServerException $e) {
                 error_log("AI SERVER ERROR: " . $e->getMessage());
                 echo "data: " . json_encode(['error' => 'El servicio de IA está temporalmente saturado. Intenta en unos segundos.']) . "\n\n";
+                ob_flush();
+                flush();
+            } catch (RateLimitExceededException $e) {
+                $retry = $e->getRetryAfter();
+                $msg = $retry 
+                    ? sprintf('Límite de peticiones alcanzado. Por favor, reintenta en %d segundos.', $retry)
+                    : 'Límite de peticiones alcanzado temporalmente. Espera unos instantes.';
+                error_log("AI RATE LIMIT: " . $e->getMessage());
+                echo "data: " . json_encode(['error' => $msg]) . "\n\n";
+                ob_flush();
+                flush();
+            } catch (MaxOutputTokensException $e) {
+                error_log("AI MAX TOKENS: " . $e->getMessage());
+                echo "data: " . json_encode(['error' => 'La respuesta del modelo excedió el límite de salida y se cortó.']) . "\n\n";
                 ob_flush();
                 flush();
             } catch (\Throwable $e) {
