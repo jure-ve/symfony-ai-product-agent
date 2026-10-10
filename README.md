@@ -90,9 +90,9 @@ config/packages/ai.yaml             # Configuración del agente y las herramient
 
 ```mermaid
 flowchart TD
-    A[Usuario / Frontend Vanilla JS] -->|POST /api/chat (SSE)| B[ProductChatController]
+    A["Usuario / Frontend Vanilla JS"] -->|"POST /api/chat (SSE)"| B[ProductChatController]
     
-    subgraph Controller [Controlador & Resiliencia]
+    subgraph Controller ["Controlador & Resiliencia"]
         B -->|Captura granular| E1[ExceedContextSizeException]
         B -->|Captura granular| E2[RateLimitExceededException]
         B -->|Captura granular| E3[ServerException]
@@ -106,14 +106,15 @@ flowchart TD
     D <-->|chat/completions| G["Groq API"]
     D -->|Tool calls automáticas| Tools
     
-    subgraph Tools [Herramientas #[AsTool]]
+    subgraph Tools ["Herramientas #[AsTool]"]
         T1[ProductSearchTool]
         T2[ProductPriceTool]
         T3[ProductCategoryTool]
     end
     
     Tools --> R[ProductRepository]
-    C -->|TextDelta Stream SSE| B --> A
+    C -->|"TextDelta Stream SSE"| B
+    B -->|"EventSource SSE"| A
 ```
 
 ---
